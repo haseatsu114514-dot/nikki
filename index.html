@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6efe5">
+    <title>4項目日記</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css?v=20260413a">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero panel">
+        <div class="hero-copy">
+          <p class="eyebrow">Daily Reflection Sheet</p>
+          <h1>4項目で頭を整える日記</h1>
+          <p class="hero-text">
+            毎日ひとことずつで大丈夫です。<br>
+            「目標・進捗・問題点・反省 / 改善点」を書くと、そのままシートへ保存され、PC でもスマホでも過去を見返せます。
+          </p>
+        </div>
+
+        <div class="hero-meta">
+          <div class="hero-chip">
+            <span class="chip-label">入力ルール</span>
+            <strong>毎日 4項目</strong>
+          </div>
+          <div class="hero-chip">
+            <span class="chip-label">書き方</span>
+            <strong>1行でも OK</strong>
+          </div>
+          <div class="hero-chip">
+            <span class="chip-label">保存先</span>
+            <strong>Google Sheets</strong>
+          </div>
+          <div class="hero-chip">
+            <span class="chip-label">同期状態</span>
+            <strong id="syncBadgeText">ローカルモード</strong>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button id="syncNowButton" class="secondary-button" type="button">シート最新反映</button>
+          <a id="openSheetLink" class="sheet-link" href="#" target="_blank" rel="noopener noreferrer" hidden>シートを開く</a>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Overview</p>
+              <h2>記録の見える化</h2>
+            </div>
+          </div>
+          <div id="statsGrid" class="stats-grid"></div>
+        </section>
+
+        <section class="workspace-grid">
+          <article class="panel entry-panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Write</p>
+                <h2>その日の4項目を書く</h2>
+              </div>
+            </div>
+
+            <form id="journalForm" class="journal-form">
+              <label class="field-group">
+                <span class="field-title">日付</span>
+                <div class="date-row">
+                  <input id="dateInput" name="dateKey" type="date" required>
+                  <button id="todayButton" class="ghost-button" type="button">今日に戻す</button>
+                </div>
+              </label>
+
+              <div id="entryStateCard" class="entry-state-card"></div>
+
+              <label class="field-group">
+                <span class="field-title">目標</span>
+                <textarea id="goalInput" name="goal" rows="2" placeholder="今日のゴールを書く" required></textarea>
+              </label>
+
+              <label class="field-group">
+                <span class="field-title">進捗</span>
+                <textarea id="progressInput" name="progress" rows="2" placeholder="何が進んだかを書く" required></textarea>
+              </label>
+
+              <label class="field-group">
+                <span class="field-title">問題点</span>
+                <textarea id="issuesInput" name="issues" rows="2" placeholder="引っかかっていることを書く" required></textarea>
+              </label>
+
+              <label class="field-group">
+                <span class="field-title">反省・改善点</span>
+                <textarea id="reflectionInput" name="reflection" rows="3" placeholder="次にどう直すかを書く" required></textarea>
+              </label>
+
+              <div class="form-actions">
+                <button id="saveButton" class="primary-button" type="submit">この日記を保存</button>
+                <button id="clearButton" class="ghost-button" type="button">入力だけ消す</button>
+              </div>
+
+              <p id="formStatus" class="form-status">
+                Google Apps Script の URL を設定すると、保存内容がシートにたまり、別の端末でも同じ履歴を見られます。
+              </p>
+            </form>
+          </article>
+
+          <article class="panel detail-panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Preview</p>
+                <h2>選択中の日記</h2>
+              </div>
+            </div>
+
+            <div id="selectedEntryDetail" class="selected-entry-detail"></div>
+          </article>
+        </section>
+
+        <section class="history-grid">
+          <article class="panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Recent</p>
+                <h2>最近の記録</h2>
+              </div>
+            </div>
+            <div id="historyList" class="history-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Sheet View</p>
+                <h2>シート風一覧</h2>
+              </div>
+              <span id="tableCountLabel" class="table-count">0件</span>
+            </div>
+
+            <div class="table-wrap">
+              <table class="sheet-table">
+                <thead>
+                  <tr>
+                    <th>日付</th>
+                    <th>目標</th>
+                    <th>進捗</th>
+                    <th>問題点</th>
+                    <th>反省・改善点</th>
+                    <th>状態</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      window.DAILY_REFLECTION_CONFIG = {
+        syncEndpoint: "",
+        syncSecret: "",
+        spreadsheetUrl: "",
+        syncIntervalMs: 60000
+      };
+    </script>
+    <script type="module" src="./app.js?v=20260413a"></script>
+  </body>
+</html>
