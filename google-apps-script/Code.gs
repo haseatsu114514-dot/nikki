@@ -187,8 +187,22 @@ function isAuthorized_(secret) {
 }
 
 function parseBody_(e) {
-  if (!e || !e.postData || !e.postData.contents) return {};
-  return JSON.parse(e.postData.contents);
+  if (!e) return {};
+
+  if (e.parameter && Object.keys(e.parameter).length) {
+    var payload = e.parameter.payload;
+    return {
+      action: e.parameter.action || "",
+      secret: e.parameter.secret || "",
+      entry: payload ? JSON.parse(payload) : {}
+    };
+  }
+
+  if (e.postData && e.postData.contents) {
+    return JSON.parse(e.postData.contents);
+  }
+
+  return {};
 }
 
 function json_(payload) {

@@ -467,17 +467,18 @@ async function runSync(forceMessage) {
 }
 
 async function postEntryToSheets(entry) {
+  const body = new URLSearchParams({
+    action: "upsertEntry",
+    secret: CONFIG.syncSecret || "",
+    payload: JSON.stringify(entry)
+  });
+
   const response = await fetch(CONFIG.syncEndpoint, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json"
     },
-    body: JSON.stringify({
-      action: "upsertEntry",
-      secret: CONFIG.syncSecret || "",
-      entry
-    })
+    body
   });
 
   const payload = await response.json();
